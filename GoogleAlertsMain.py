@@ -13,7 +13,35 @@ PATH = r"C:\Users\YuChen\Desktop\chromedriver"
 
 # keyword for searching
 print("Please enter Keyword: ")
-keyword = input()
+keyword1 = input()
+
+# search parameters
+print("Would you like to refine the search? Y/N")
+refineSearch = input()
+if refineSearch == "Y" or refineSearch == "y":
+    print("How would you like to refine the search?")
+    print("1. Combine search term")
+    print("2. Search social media")
+    print("3. Exclude a word")
+    print("4. Search within a website")
+    searchOption = input()
+    if searchOption == "1":
+        print("Please enter second keyword:")
+        keyword2 = input()
+        keyword = keyword1 + " OR " + keyword2
+    elif searchOption == "2":
+        keyword = "@" + keyword1
+    elif searchOption == "3":
+        print("Please enter word to exclude:")
+        keyword2 = input()
+        keyword = keyword1 + " -" + keyword2
+    elif searchOption == "4":
+        print("Please enter website")
+        keyword2 = input()
+        keyword = keyword1 + " site:" + keyword2
+else:
+    keyword = keyword1
+
 
 # let the csv writer know whether to append or write
 print("Please enter the integer")
@@ -24,6 +52,8 @@ if whattodo == 1:
     alpha = 'a'
 elif whattodo == 2:
     alpha = 'w'
+
+
 
 # open chrome
 browser = webdriver.Chrome(PATH)
