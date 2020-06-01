@@ -9,7 +9,8 @@ import csv
 from selenium.webdriver.common.keys import Keys
 
 # path where chromedriver is located
-PATH = r"C:\Users\YuChen\Desktop\chromedriver"
+PATH = r":C:\Users\yc_19\Documents\chromedriver"
+#PATH = r"C:\Users\YuChen\Desktop\chromedriver"
 
 # keyword for searching
 print("Please enter Keyword: ")
