@@ -102,6 +102,8 @@ df['Source'] = sourcesText
 df['Link'] = linksText
 df['Paragraph'] = paragraphText
 
+# drop duplicates
+df.drop_duplicates(subset='Paragraph', inplace=True)
 # look for existing file
 try:
     wb = openpyxl.load_workbook(keyword + '.xlsx')
