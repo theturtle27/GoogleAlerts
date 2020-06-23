@@ -15,9 +15,13 @@ import openpyxl
 PATH = r"chromedriver"
 
 # keyword for searching
-print("Please enter Keyword: ")
-keyword = input()
-numberOfArticles = int(input("Please enter the number of articles: "))
+wb_obj = openpyxl.load_workbook("Parameters.xlsx")
+
+# Get workbook active sheet object
+# from the active attribute
+sheet_obj = wb_obj.active
+keyword = sheet_obj.cell(row=2, column=5).value
+numberOfArticles = int(sheet_obj.cell(row=3, column=5).value)
 
 now = datetime.now()
 date = now.strftime("%d-%m-%y %H%M")

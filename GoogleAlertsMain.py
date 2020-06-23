@@ -11,10 +11,14 @@ import pandas as pd
 PATH = r"chromedriver"
 
 # keyword for searching
-print("Please enter Keyword: ")
-keyword = input()
+wb_obj = openpyxl.load_workbook("Parameters.xlsx")
 
-numberOfArticles = int(input("Please enter the number of articles: "))
+# Get workbook active sheet object
+# from the active attribute
+sheet_obj = wb_obj.active
+keyword = sheet_obj.cell(row=2, column=2).value
+numberOfArticles = int(sheet_obj.cell(row=3, column=2).value)
+
 
 # get date time
 now = datetime.now()
@@ -28,24 +32,23 @@ browser.get('https://www.google.com.sg/alerts#')
 
 # locate the search box and send keyword
 element = WebDriverWait(browser, 10).until(
-    EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div[2]/div[1]/div/div[1]/div[1]/div/input"))
+    EC.presence_of_element_located((By.XPATH, "//*[@id='query_div']/input"))
 )
 element.send_keys(keyword)
 
 # change results to all results
 show_options = WebDriverWait(browser, 10).until(
     EC.presence_of_element_located(
-        (By.XPATH, "/html/body/div[2]/div[2]/div[1]/div/div[1]/div[2]/div[2]/div[2]/span[3]")))
+        (By.XPATH, "//*[@id='create-alert-div']/div[2]/div[2]/div[2]/span[3]")))
 show_options.click()
 
 show = WebDriverWait(browser, 10).until(
-    EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div[2]/div[1]/div/div[1]/div[2]/div[2]/div[1]"
-                                              "/table/tbody/tr[5]/td[2]/div/div[1]"))
+    EC.presence_of_element_located((By.XPATH, "//*[@id=':6']"))
 )
 show.click()
 
 show_expanded = WebDriverWait(browser, 10).until(
-    EC.presence_of_element_located((By.XPATH, "/html/body/div[5]/div[2]/div"))
+    EC.presence_of_element_located((By.XPATH, "//*[@id=':5']"))
 )
 show_expanded.click()
 
