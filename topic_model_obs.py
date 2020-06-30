@@ -78,7 +78,7 @@ col_name = input("Please enter column name:\n")
 
 datetoday = datetime.today().strftime('%d%m%y')
 filename = "covid19"
-numtopics = 2
+numtopics = 4
 
 OUTPUT_DIR = "output/"
 current_directory = os.getcwd()
@@ -99,7 +99,7 @@ data = pd.read_excel(filename + ".xlsx", 'Master')
 #columns_to_LDA = data[[col_name]]
 #columns_to_LDA = data[['Q69_11','Q69_12','Q70_12','Q70_13','Q93_29','Q93_35','Q94_30','Q94_36']]
 #columns_to_LDA = data[['(Q69) 12. Do you have suggestions for improvement for any of the Mission X activities?']]
-columns_to_LDA = data[['Paragraph',]]
+columns_to_LDA = data[['Paragraph', 'Source']]
 # (Q69) 11. Do you have suggestions for improvement for any of the Mission X activities?    - BR1 - Q69_11	
 # (Q69) 12. Do you have suggestions for improvement for any of the Mission X activities?    - FV1 - Q69_12
 # (Q70) 12. What other topics would you like to be included in the training workshop?       - BS1 - Q70_12
@@ -114,7 +114,7 @@ os.chdir(current_directory)
 list_of_topictables = []
 list_of_df_dominant_topic=[]
 df = columns_to_LDA
-
+i=0
 # WORD THRESHOLD - Only analyse sentences which have more than 5 words
 for column in columns_to_LDA.columns:
     df['source'] = columns_to_LDA[column].fillna('').astype(str).apply(word_swap)
@@ -147,13 +147,13 @@ for column in columns_to_LDA.columns:
     #print(cm)
 
     top_words_per_topic = []
-
     for t in range(lda_model.num_topics):
         top_words_per_topic.extend([(t, ) + x for x in lda_model.show_topic(t, topn = 10)])
     topictable = pd.DataFrame(top_words_per_topic, columns=['Topic', 'Word', 'Weight'])
-    topictable.columns = [column + '_' + str(col_header) for col_header in topictable.columns]
+    # topictable.columns = [column + '_' + str(col_header) for col_header in topictable.columns]
     list_of_topictables.append(topictable)
-
+    print(list_of_topictables)
+    i += 1
     # Visualize the topics using pyLDAvis
     vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word)
 
@@ -172,8 +172,16 @@ for column in columns_to_LDA.columns:
     list_of_df_dominant_topic.append(df_dominant_topic)
 
 # write the topic tables and topic master matrix into one dataframe
-alltopicstables = pd.DataFrame()
+alltopictables = pd.DataFrame()
 alltopictables = pd.concat(list_of_topictables, axis = 1)
+
+N = 3
+alltopictables = np.split(alltopictables, np.arange(N, len(df.columns), N), axis=1)
+
+alltopictablesfinal = pd.DataFrame()
+
+alltopictablesfinal = pd.concat(alltopictables)
+print(alltopictablesfinal)
 mastermatrix = pd.DataFrame()
 mastermatrix = pd.concat(list_of_df_dominant_topic, axis = 1)
 outputmatrix = pd.concat([data,mastermatrix], axis = 1)
@@ -184,7 +192,7 @@ outputfilename_wo_ext = f'filename{datetoday}_export'
 writer = pd.ExcelWriter(outputfilename, engine = 'xlsxwriter')
 outputmatrix.to_excel(writer,sheet_name = "Masterlist")
 mastermatrix.to_excel(writer,sheet_name = "Topic Master Matrix")
-alltopictables.to_excel(writer,sheet_name = "Topic Tables")
+alltopictablesfinal.to_excel(writer,sheet_name = "Topic Tables")
 writer.save()
 
 print(f'All done')
