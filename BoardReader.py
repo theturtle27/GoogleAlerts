@@ -94,14 +94,20 @@ while len(dfMain.index) < numberOfArticles:
                     (By.XPATH, "/html/body/div[1]/app-root/results/div/div[1]/div/div/div/p[2]/a")))
             k += 1
         else:
-            nextPage = WebDriverWait(browser, 10).until(
-                EC.presence_of_element_located(
-                    (By.XPATH, "/html/body/div[1]/app-root/results/div/div[1]/div/div/div/p[2]/a[2]")))
+            if k < 7:
+                nextPage = WebDriverWait(browser, 10).until(
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "#form-holder > div > div > p.pager > a:nth-child(12)")))
+            else:
+                nextPage = WebDriverWait(browser, 10).until(
+                    EC.presence_of_element_located(
+                        (By.XPATH, "// *[ @ id = 'form-holder'] / div / div / p[2] / a[3]")))
         nextPage.click()
         WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "title")))
         titles = browser.find_elements_by_class_name("title")
         sources = browser.find_elements_by_class_name("last-info")
         links = browser.find_elements_by_tag_name("a")
+        k += 1
         i = 0
     dfCopy['Keyword'] = keywordText
     dfCopy['Title'] = titlesText

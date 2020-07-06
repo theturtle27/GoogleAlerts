@@ -16,10 +16,8 @@ from gensim.utils import simple_preprocess
 from gensim.models import CoherenceModel
 from gensim.models.wrappers import LdaMallet
 import xlrd
-
 import nltk
 nltk.download("popular")
-
 import warnings
 warnings.filterwarnings("ignore",category=DeprecationWarning)
 import pyLDAvis
@@ -75,11 +73,15 @@ numtopics = input("Please enter the number of word clusters to generate:\n")
 print("")
 col_name = input("Please enter column name:\n")
 '''
-
+numberofquestions = 4
 datetoday = datetime.today().strftime('%d%m%y')
 filename = "covid19"
 numtopics = 4
-
+listOfQuestions = []
+for x in range(numberofquestions):
+    listOfQuestions.append("Question %d" %x)
+print(listOfQuestions)
+print(listOfQuestions[0])
 OUTPUT_DIR = "output/"
 current_directory = os.getcwd()
 # directory = os.chdir(current_directory + "/rawdata")
@@ -115,6 +117,7 @@ list_of_topictables = []
 list_of_df_dominant_topic=[]
 df = columns_to_LDA
 i=0
+j=0
 # WORD THRESHOLD - Only analyse sentences which have more than 5 words
 for column in columns_to_LDA.columns:
     df['source'] = columns_to_LDA[column].fillna('').astype(str).apply(word_swap)
@@ -149,11 +152,17 @@ for column in columns_to_LDA.columns:
     top_words_per_topic = []
     for t in range(lda_model.num_topics):
         top_words_per_topic.extend([(t, ) + x for x in lda_model.show_topic(t, topn = 10)])
-    topictable = pd.DataFrame(top_words_per_topic, columns=['Topic', 'Word', 'Weight'])
+    topictable = pd.DataFrame(top_words_per_topic, columns=['Topic', 'Word', 'Weight',])
+    questionNumbers = []
+    for j in range(len(topictable.index)):
+        questionNumbers.append(listOfQuestions[i])
+    print(len(topictable.index))
+    print(len(questionNumbers))
+    topictable['Question'] = questionNumbers
+
     # topictable.columns = [column + '_' + str(col_header) for col_header in topictable.columns]
     list_of_topictables.append(topictable)
     print(list_of_topictables)
-    i += 1
     # Visualize the topics using pyLDAvis
     vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word)
 
@@ -168,23 +177,28 @@ for column in columns_to_LDA.columns:
     # Format
     df_dominant_topic = df_topic_sents_keywords.reset_index()
     df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
-    df_dominant_topic.columns = [column + '_' + str(col_header) for col_header in df_dominant_topic.columns]
+    # df_dominant_topic.columns = [column + '_' + str(col_header) for col_header in df_dominant_topic.columns]
+    questionNumbers=[]
+    for j in range(len(df_dominant_topic.index)):
+        questionNumbers.append(listOfQuestions[i])
+    df_dominant_topic['Question'] = questionNumbers
     list_of_df_dominant_topic.append(df_dominant_topic)
+    i += 1
 
 # write the topic tables and topic master matrix into one dataframe
 alltopictables = pd.DataFrame()
-alltopictables = pd.concat(list_of_topictables, axis = 1)
+alltopictables = pd.concat(list_of_topictables)
 
-N = 3
-alltopictables = np.split(alltopictables, np.arange(N, len(df.columns), N), axis=1)
-
-alltopictablesfinal = pd.DataFrame()
-
-alltopictablesfinal = pd.concat(alltopictables)
-print(alltopictablesfinal)
+# N = 3
+# alltopictables = np.split(alltopictables, np.arange(N, len(df.columns), N), axis=1)
+#
+# alltopictablesfinal = pd.DataFrame()
+#
+# alltopictablesfinal = pd.concat(alltopictables)
+# print(alltopictablesfinal)
 mastermatrix = pd.DataFrame()
-mastermatrix = pd.concat(list_of_df_dominant_topic, axis = 1)
-outputmatrix = pd.concat([data,mastermatrix], axis = 1)
+mastermatrix = pd.concat(list_of_df_dominant_topic)
+outputmatrix = pd.concat([data,mastermatrix])
 
 # Writing the dataframes into a single Excel workbook ------------------------
 outputfilename = f'{OUTPUT_DIR}filename{datetoday}_export.xlsx'
@@ -192,7 +206,7 @@ outputfilename_wo_ext = f'filename{datetoday}_export'
 writer = pd.ExcelWriter(outputfilename, engine = 'xlsxwriter')
 outputmatrix.to_excel(writer,sheet_name = "Masterlist")
 mastermatrix.to_excel(writer,sheet_name = "Topic Master Matrix")
-alltopictablesfinal.to_excel(writer,sheet_name = "Topic Tables")
+alltopictables.to_excel(writer,sheet_name = "Topic Tables")
 writer.save()
 
 print(f'All done')
