@@ -25,7 +25,6 @@ from nltk.corpus import stopwords
 
 # path where chromedriver is located
 PATH = r"chromedriver"
-
 # keyword for searching
 wb_obj = openpyxl.load_workbook("Parameters.xlsx")
 
@@ -325,7 +324,7 @@ print(listOfQuestions[0])
 OUTPUT_DIR = "output/"
 current_directory = os.getcwd()
 # directory = os.chdir(current_directory + "/rawdata")
-directory = os.chdir(r"C:\Users\YuChen\PycharmProjects\GoogleAlerts\OBS_quality_quotes")
+directory = os.chdir(r"OBS_quality_quotes")
 data = pd.read_excel(filename + ".xlsx", 'Master')
 
 '''
