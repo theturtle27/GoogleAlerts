@@ -406,7 +406,8 @@ for column in columns_to_LDA.columns:
     vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word)
 
     # Save the visualisation into an interactive page. Details on how to read it here: https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/
-    pyLDAvis.save_html(vis, f'{OUTPUT_DIR}filename_{column}_LDA_vis_{datetoday}.html')
+    # ERROR when using the code
+    # pyLDAvis.save_html(vis, f'{OUTPUT_DIR}filename_{column}_LDA_vis_{datetoday}.html')
 
     df_topic_sents_keywords = format_topics_sentences(ldamodel=lda_model,
                                                       corpus=corpus,

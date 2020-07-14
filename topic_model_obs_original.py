@@ -15,9 +15,10 @@ import gensim.corpora as corpora
 from gensim.utils import simple_preprocess
 from gensim.models import CoherenceModel
 from gensim.models.wrappers import LdaMallet
-import xlrd
+
 import nltk
 nltk.download("popular")
+
 import warnings
 warnings.filterwarnings("ignore",category=DeprecationWarning)
 import pyLDAvis
@@ -73,19 +74,15 @@ numtopics = input("Please enter the number of word clusters to generate:\n")
 print("")
 col_name = input("Please enter column name:\n")
 '''
-numberofquestions = 4
+
 datetoday = datetime.today().strftime('%d%m%y')
 filename = "#istandwithraeesah"
 numtopics = 4
-listOfQuestions = []
-for x in range(numberofquestions):
-    listOfQuestions.append("Question %d" %x)
-print(listOfQuestions)
-print(listOfQuestions[0])
+
 OUTPUT_DIR = "output/"
 current_directory = os.getcwd()
 # directory = os.chdir(current_directory + "/rawdata")
-directory = os.chdir(r"Excel")
+directory = os.chdir("Excel")
 data = pd.read_excel(filename + ".xlsx", '13-07-20 1436')
 
 '''
@@ -116,8 +113,7 @@ os.chdir(current_directory)
 list_of_topictables = []
 list_of_df_dominant_topic=[]
 df = columns_to_LDA
-i=0
-j=0
+
 # WORD THRESHOLD - Only analyse sentences which have more than 5 words
 for column in columns_to_LDA.columns:
     df['source'] = columns_to_LDA[column].fillna('').astype(str).apply(word_swap)
@@ -150,26 +146,26 @@ for column in columns_to_LDA.columns:
     #print(cm)
 
     top_words_per_topic = []
-    for t in range(lda_model.num_topics):
-        top_words_per_topic.extend([(t, ) + x for x in lda_model.show_topic(t, topn = 10)])
-    topictable = pd.DataFrame(top_words_per_topic, columns=['Topic', 'Word', 'Weight',])
-    questionNumbers = []
-    for j in range(len(topictable.index)):
-        questionNumbers.append(listOfQuestions[i])
-    print(len(topictable.index))
-    print(len(questionNumbers))
-    topictable['Question'] = questionNumbers
 
-    # topictable.columns = [column + '_' + str(col_header) for col_header in topictable.columns]
+    for t in range(lda_model.num_topics):
+        if t ==0:
+            top_words_per_topic.extend([(3,) + x for x in lda_model.show_topic(t, topn=10)])
+        elif t ==1:
+            top_words_per_topic.extend([(4,) + x for x in lda_model.show_topic(t, topn=10)])
+        elif t ==2:
+            top_words_per_topic.extend([(1,) + x for x in lda_model.show_topic(t, topn=10)])
+        elif t ==3:
+            top_words_per_topic.extend([(2,) + x for x in lda_model.show_topic(t, topn=10)])
+
+    topictable = pd.DataFrame(top_words_per_topic, columns=['Topic', 'Word', 'Weight'])
+    topictable.columns = [column + '_' + str(col_header) for col_header in topictable.columns]
     list_of_topictables.append(topictable)
-    print(list_of_topictables)
+
     # Visualize the topics using pyLDAvis
     vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word)
 
     # Save the visualisation into an interactive page. Details on how to read it here: https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/
     pyLDAvis.save_html(vis, f'{OUTPUT_DIR}filename_{column}_LDA_vis_{datetoday}.html')
-
-    pyLDAvis.printtopics(5)
 
     df_topic_sents_keywords = format_topics_sentences(ldamodel=lda_model,
                                                       corpus=corpus,
@@ -179,28 +175,17 @@ for column in columns_to_LDA.columns:
     # Format
     df_dominant_topic = df_topic_sents_keywords.reset_index()
     df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
-    # df_dominant_topic.columns = [column + '_' + str(col_header) for col_header in df_dominant_topic.columns]
-    questionNumbers=[]
-    for j in range(len(df_dominant_topic.index)):
-        questionNumbers.append(listOfQuestions[i])
-    df_dominant_topic['Question'] = questionNumbers
+    df_dominant_topic.columns = [column + '_' + str(col_header) for col_header in df_dominant_topic.columns]
     list_of_df_dominant_topic.append(df_dominant_topic)
-    i += 1
+
+topictable.sort_values(by=['Text_Topic'], inplace= True)
 
 # write the topic tables and topic master matrix into one dataframe
-alltopictables = pd.DataFrame()
-alltopictables = pd.concat(list_of_topictables)
-
-# N = 3
-# alltopictables = np.split(alltopictables, np.arange(N, len(df.columns), N), axis=1)
-#
-# alltopictablesfinal = pd.DataFrame()
-#
-# alltopictablesfinal = pd.concat(alltopictables)
-# print(alltopictablesfinal)
+alltopicstables = pd.DataFrame()
+alltopictables = pd.concat(list_of_topictables, axis = 1)
 mastermatrix = pd.DataFrame()
-mastermatrix = pd.concat(list_of_df_dominant_topic)
-outputmatrix = pd.concat([data,mastermatrix])
+mastermatrix = pd.concat(list_of_df_dominant_topic, axis = 1)
+outputmatrix = pd.concat([data,mastermatrix], axis = 1)
 
 # Writing the dataframes into a single Excel workbook ------------------------
 outputfilename = f'{OUTPUT_DIR}filename{datetoday}_export.xlsx'
@@ -210,7 +195,6 @@ outputmatrix.to_excel(writer,sheet_name = "Masterlist")
 mastermatrix.to_excel(writer,sheet_name = "Topic Master Matrix")
 alltopictables.to_excel(writer,sheet_name = "Topic Tables")
 writer.save()
-
 print(f'All done')
 
 # ------------------------------------------------------------------------
