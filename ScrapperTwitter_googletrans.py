@@ -2,37 +2,58 @@ import GetOldTweets3 as got
 import pandas as pd
 import openpyxl
 from datetime import datetime
+from googletrans import Translator
 
-keyword = '#istandwithraeesah'
-count = 2000
+# specify path to output excel and csv
+excelPath = r"Excel\\"
+csvPath = r"CSV\\"
 
 # get date time
 now = datetime.now()
 date = now.strftime("%d-%m-%y %H%M")
 
+# open parameters workbook
+wb_obj = openpyxl.load_workbook("Parameters.xlsx")
+
+# Get workbook active sheet object
+# from the active attribute
+sheet_obj = wb_obj.active
+
+# get keyword and count from sheet
+keyword = sheet_obj.cell(row=10, column=2).value
+count = int(sheet_obj.cell(row=11, column=2).value)
+
+# Creation of translator object
+translator = Translator()
+
 # Creation of query object
 tweetCriteria = got.manager.TweetCriteria().setQuerySearch(keyword) \
     .setMaxTweets(count)
+
 # Creation of list that contains all tweets
 tweets = got.manager.TweetManager.getTweets(tweetCriteria)
-# Creating list of chosen tweet data
-text_tweets = [[tweet.date, tweet.text] for tweet in tweets]
-print(text_tweets)
-# create dataFrame
-df = pd.DataFrame(text_tweets, columns=["Time", "Text"])
-print(df)
-df['Time']=df['Time'].dt.tz_localize(None)
-print(df)
 
-# drop duplicates
-df.drop_duplicates(subset='Text', inplace=True)
+# Creating list of chosen tweet data
+text_tweets = [[tweet.date, tweet.text, tweet.username, tweet.retweets] for tweet in tweets]
+
+# Loop through tweets and change language to english
+for i in range(len(text_tweets)):
+    translation = translator.translate(text_tweets[i][1])
+    text_tweets[i][1] = translation.text
+
+# create dataFrame
+df = pd.DataFrame(text_tweets, columns=["Time", "Text", "Username", "Retweets"])
+
+# remove timezone info from Time column if not error
+df['Time'] = df['Time'].dt.tz_localize(None)
+
 # look for existing file
 try:
-    wb = openpyxl.load_workbook(keyword + '.xlsx')
+    wb = openpyxl.load_workbook(excelPath + keyword + '.xlsx')
 
     # Inside this context manager, handle everything related to writing new data to the file\
     # without overwriting existing data
-    with pd.ExcelWriter(keyword + '.xlsx', engine='openpyxl') as writer:
+    with pd.ExcelWriter(excelPath + keyword + '.xlsx', engine='openpyxl') as writer:
         # Your loaded workbook is set as the "base of work"
         writer.book = wb
 
@@ -46,12 +67,12 @@ try:
 
         # Save the file
         writer.save()
-# write new file
+# else write new file
 except Exception as e:
     print(e)
-    df.to_excel(keyword + '.xlsx',
+    df.to_excel(excelPath + keyword + '.xlsx',
                 sheet_name=date,
                 index=False)
 
 # write to csv
-df.to_csv(keyword + date + '.csv', index=False)
+df.to_csv(csvPath + keyword + date + '.csv', index=False)

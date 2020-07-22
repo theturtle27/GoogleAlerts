@@ -13,7 +13,8 @@ import openpyxl
 
 # path where chromedriver is located
 PATH = r"chromedriver"
-
+excelPath = r"Excel\\"
+csvPath = r"CSV\\"
 # keyword for searching
 wb_obj = openpyxl.load_workbook("Parameters.xlsx")
 
@@ -145,7 +146,7 @@ try:
         # Save the file
         writer.save()
 except Exception as e:
-    dfMain.to_excel(keyword + '.xlsx',
+    dfMain.to_excel(excelPath + keyword + '.xlsx',
                 sheet_name=date,
                 index=False)
-dfMain.to_csv(keyword + date + '.csv', index=False)
+dfMain.to_csv(csvPath + keyword + date + '.csv', index=False)

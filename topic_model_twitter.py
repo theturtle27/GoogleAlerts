@@ -1,25 +1,20 @@
 # ---------------------------------------------------------------------------------------
-# clear items from here 
+# clear items from here
 # ---------------------------------------------------------------------------------------
 # C:\Users\NYC\Downloads
 # D:\Work\YCS Survey Automation\topic_model\output
 
 from datetime import datetime
-import re
-import numpy as np
 import pandas as pd
-import csv
 import os
 import gensim
 import gensim.corpora as corpora
 from gensim.utils import simple_preprocess
 from gensim.models import CoherenceModel
-from gensim.models.wrappers import LdaMallet
-
+import openpyxl
 import nltk
 
 nltk.download("popular")
-
 import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -85,14 +80,29 @@ col_name = input("Please enter column name:\n")
 '''
 
 datetoday = datetime.today().strftime('%d%m%y')
-filename = "#istandwithraeesah"
-numtopics = 3
+
+# open parameters workbook
+wb_obj = openpyxl.load_workbook("Parameters.xlsx")
+
+# Get workbook active sheet object
+# from the active attribute
+sheet_obj = wb_obj.active
+
+# get filename, sheetName, number of topics, number of questions and question header from sheet
+filename = sheet_obj.cell(row=14, column=2).value
+sheetName = sheet_obj.cell(row=15, column=2).value
+numtopics = int(sheet_obj.cell(row=16, column=2).value)
+noOfQuestions = int(sheet_obj.cell(row=17, column=2).value)
+header1 = sheet_obj.cell(row=18, column=2).value
+header2 = sheet_obj.cell(row=19, column=2).value
+header3 = sheet_obj.cell(row=20, column=2).value
+header4 = sheet_obj.cell(row=21, column=2).value
 
 OUTPUT_DIR = "output/"
 current_directory = os.getcwd()
 # directory = os.chdir(current_directory + "/rawdata")
 directory = os.chdir("Excel")
-data = pd.read_excel(filename + ".xlsx", '13-07-20 1436')
+data = pd.read_excel(filename + ".xlsx", sheetName)
 
 '''
 "C01: 1.	What was the most challenging moment during the course? How did you overcome it?"	
@@ -107,13 +117,20 @@ data = pd.read_excel(filename + ".xlsx", '13-07-20 1436')
 # columns_to_LDA = data[[col_name]]
 # columns_to_LDA = data[['Q69_11','Q69_12','Q70_12','Q70_13','Q93_29','Q93_35','Q94_30','Q94_36']]
 # columns_to_LDA = data[['(Q69) 12. Do you have suggestions for improvement for any of the Mission X activities?']]
-columns_to_LDA = data[['Text']]
-# (Q69) 11. Do you have suggestions for improvement for any of the Mission X activities?    - BR1 - Q69_11	
+if noOfQuestions == 1:
+    columns_to_LDA = data[[header1]]
+elif noOfQuestions == 2:
+    columns_to_LDA = data[[header1], [header2]]
+elif noOfQuestions == 3:
+    columns_to_LDA = data[[header1], [header2], [header3]]
+elif noOfQuestions == 4:
+    columns_to_LDA = data[[header1], [header2], [header3], [header4]]
+# (Q69) 11. Do you have suggestions for improvement for any of the Mission X activities?    - BR1 - Q69_11
 # (Q69) 12. Do you have suggestions for improvement for any of the Mission X activities?    - FV1 - Q69_12
 # (Q70) 12. What other topics would you like to be included in the training workshop?       - BS1 - Q70_12
 # (Q70) 13. What other topics would you like to be included in the training workshop?       - FW1 - Q70_13
-# (Q93) 29. What were your key takeaways?                                                   - DA1 - Q93_29	
-# (Q93) 35. What were your key takeaways?                                                   - HJ1 - Q93_35      	
+# (Q93) 29. What were your key takeaways?                                                   - DA1 - Q93_29
+# (Q93) 35. What were your key takeaways?                                                   - HJ1 - Q93_35
 # (Q94) 30. Any other comments or areas of improvements for Mission X?                      - DB1 - Q94_30
 # (Q94) 36. Any other comments or areas of improvements for Mission X?                      - HK1 - Q94_36
 
@@ -161,15 +178,7 @@ for column in columns_to_LDA.columns:
     top_words_per_topic = []
 
     for t in range(lda_model.num_topics):
-        if t == 0:
-            top_words_per_topic.extend([(3,) + x for x in lda_model.show_topic(t, topn=10)])
-        elif t == 1:
-            top_words_per_topic.extend([(4,) + x for x in lda_model.show_topic(t, topn=10)])
-        elif t == 2:
-            top_words_per_topic.extend([(1,) + x for x in lda_model.show_topic(t, topn=10)])
-        elif t == 3:
-            top_words_per_topic.extend([(2,) + x for x in lda_model.show_topic(t, topn=10)])
-
+        top_words_per_topic.extend([(t,) + x for x in lda_model.show_topic(t, topn=10)])
     topictable = pd.DataFrame(top_words_per_topic, columns=['Topic', 'Word', 'Weight'])
     topictable.columns = [column + '_' + str(col_header) for col_header in topictable.columns]
     list_of_topictables.append(topictable)
@@ -178,7 +187,7 @@ for column in columns_to_LDA.columns:
     vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word)
 
     # Save the visualisation into an interactive page. Details on how to read it here: https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/
-    pyLDAvis.save_html(vis, f'{OUTPUT_DIR}filename_{column}_LDA_vis_{datetoday}.html')
+    pyLDAvis.save_html(vis, f'{OUTPUT_DIR}{filename}_{column}_LDA_vis_{datetoday}.html')
 
     df_topic_sents_keywords = format_topics_sentences(ldamodel=lda_model,
                                                       corpus=corpus,
@@ -190,8 +199,6 @@ for column in columns_to_LDA.columns:
     df_dominant_topic.columns = ['Document_No', 'Dominant_Topic', 'Topic_Perc_Contrib', 'Keywords', 'Text']
     df_dominant_topic.columns = [column + '_' + str(col_header) for col_header in df_dominant_topic.columns]
     list_of_df_dominant_topic.append(df_dominant_topic)
-
-topictable.sort_values(by=['Text_Topic'], inplace=True)
 
 # write the topic tables and topic master matrix into one dataframe
 alltopicstables = pd.DataFrame()
@@ -217,4 +224,4 @@ print(f'All done')
 # ------------------------------------------------------------------------
 # os.system("python topic_model_create_charts.py \"What were your key takeaways?\" \"filename090320_export\"")
 # os.system(' python topic_model_create_charts.py "What were your key takeaways?" "filename090320_export" ')
-# os.system(' python topic_model_create_charts.py "What were your key takeaways?" "' + outputfilename_wo_ext +'" ')
+# os.system(' python topic_model_create_charts.py "What were your key takeaways?" "' + outputfilename_

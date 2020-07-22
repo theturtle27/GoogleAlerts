@@ -9,10 +9,10 @@ import pandas as pd
 
 # path where chromedriver is located
 PATH = r"chromedriver"
-
+excelPath = r"Excel\\"
+csvPath = r"CSV\\"
 # keyword for searching
 wb_obj = openpyxl.load_workbook("Parameters.xlsx")
-
 # Get workbook active sheet object
 # from the active attribute
 sheet_obj = wb_obj.active
@@ -130,9 +130,9 @@ try:
 # write new file
 except Exception as e:
     print(e)
-    df.to_excel(keyword + '.xlsx',
+    df.to_excel(excelPath + keyword + '.xlsx',
                 sheet_name=date,
                 index=False)
 
 # write to csv
-df.to_csv(keyword + date + '.csv', index=False)
+df.to_csv(csvPath + keyword + date + '.csv', index=False)

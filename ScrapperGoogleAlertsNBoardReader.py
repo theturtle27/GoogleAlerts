@@ -2,26 +2,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from datetime import datetime
 from selenium.webdriver.common.keys import Keys
 import openpyxl
 from datetime import datetime
-import re
-import numpy as np
 import pandas as pd
-import csv
-import os
-import gensim
-import gensim.corpora as corpora
-from gensim.utils import simple_preprocess
-from gensim.models import CoherenceModel
-import nltk
-nltk.download("popular")
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-import pyLDAvis
-import pyLDAvis.gensim
-from nltk.corpus import stopwords
 
 # path where chromedriver is located
 PATH = r"chromedriver"
