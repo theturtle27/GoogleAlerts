@@ -120,11 +120,11 @@ data = pd.read_excel(filename + ".xlsx", sheetName)
 if noOfQuestions == 1:
     columns_to_LDA = data[[header1]]
 elif noOfQuestions == 2:
-    columns_to_LDA = data[[header1], [header2]]
+    columns_to_LDA = data[[header1, header2]]
 elif noOfQuestions == 3:
-    columns_to_LDA = data[[header1], [header2], [header3]]
+    columns_to_LDA = data[[header1, header2, header3]]
 elif noOfQuestions == 4:
-    columns_to_LDA = data[[header1], [header2], [header3], [header4]]
+    columns_to_LDA = data[[header1, header2, header3, header4]]
 # (Q69) 11. Do you have suggestions for improvement for any of the Mission X activities?    - BR1 - Q69_11
 # (Q69) 12. Do you have suggestions for improvement for any of the Mission X activities?    - FV1 - Q69_12
 # (Q70) 12. What other topics would you like to be included in the training workshop?       - BS1 - Q70_12

@@ -124,11 +124,11 @@ data = pd.read_excel(filename + ".xlsx", sheetName)
 if noOfQuestions == 1:
     columns_to_LDA = data[[header1]]
 elif noOfQuestions == 2:
-    columns_to_LDA = data[[header1], [header2]]
+    columns_to_LDA = data[[header1, header2]]
 elif noOfQuestions == 3:
-    columns_to_LDA = data[[header1], [header2], [header3]]
+    columns_to_LDA = data[[header1, header2, header3]]
 elif noOfQuestions == 4:
-    columns_to_LDA = data[[header1], [header2], [header3], [header4]]
+    columns_to_LDA = data[[header1, header2, header3, header4]]
 # (Q69) 11. Do you have suggestions for improvement for any of the Mission X activities?    - BR1 - Q69_11	
 # (Q69) 12. Do you have suggestions for improvement for any of the Mission X activities?    - FV1 - Q69_12
 # (Q70) 12. What other topics would you like to be included in the training workshop?       - BS1 - Q70_12
@@ -143,7 +143,7 @@ os.chdir(current_directory)
 list_of_topictables = []
 list_of_df_dominant_topic = []
 df = columns_to_LDA
-i = 0
+i = 1
 j = 0
 # WORD THRESHOLD - Only analyse sentences which have more than 5 words
 for column in columns_to_LDA.columns:
@@ -183,17 +183,16 @@ for column in columns_to_LDA.columns:
     top_words_per_topic = []
     for t in range(lda_model.num_topics):
         top_words_per_topic.extend([(t,) + x for x in lda_model.show_topic(t, topn=10)])
-    topictable = pd.DataFrame(top_words_per_topic, columns=['Topic', 'Word', 'Weight', ])
+    print(top_words_per_topic)
+    topictable = pd.DataFrame(top_words_per_topic, columns=['Topic', 'Word', 'Weight'])
     questionNumbers = []
-    for j in range(len(topictable.index)):
+    for x in range(numtopics*10):
         questionNumbers.append(i)
-    print(len(topictable.index))
-    print(len(questionNumbers))
     topictable['Question'] = questionNumbers
+    print(topictable)
 
     # topictable.columns = [column + '_' + str(col_header) for col_header in topictable.columns]
     list_of_topictables.append(topictable)
-    print(list_of_topictables)
     # Visualize the topics using pyLDAvis
     vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word)
 
@@ -217,7 +216,7 @@ for column in columns_to_LDA.columns:
     i += 1
 
 # write the topic tables and topic master matrix into one dataframe
-alltopictables = pd.DataFrame()
+alltopicstables = pd.DataFrame()
 alltopictables = pd.concat(list_of_topictables)
 
 # N = 3
@@ -229,6 +228,7 @@ alltopictables = pd.concat(list_of_topictables)
 # print(alltopictablesfinal)
 mastermatrix = pd.DataFrame()
 mastermatrix = pd.concat(list_of_df_dominant_topic)
+data = pd.concat([data]*noOfQuestions)
 outputmatrix = pd.concat([data, mastermatrix], axis=1)
 
 # Writing the dataframes into a single Excel workbook ------------------------
