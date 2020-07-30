@@ -5,24 +5,18 @@
 # D:\Work\YCS Survey Automation\topic_model\output
 
 from datetime import datetime
-import re
-import numpy as np
 import pandas as pd
-import csv
 import os
 import gensim
 import gensim.corpora as corpora
 from gensim.utils import simple_preprocess
 from gensim.models import CoherenceModel
-from gensim.models.wrappers import LdaMallet
-import xlrd
 import nltk
 
 nltk.download("popular")
 import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-import pyLDAvis
 import openpyxl
 import pyLDAvis.gensim
 from nltk.corpus import stopwords

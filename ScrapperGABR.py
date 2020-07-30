@@ -17,11 +17,7 @@ wb_obj = openpyxl.load_workbook("Parameters.xlsx")
 sheet_obj = wb_obj.active
 keyword = sheet_obj.cell(row=2, column=2).value
 numberOfArticles = int(sheet_obj.cell(row=3, column=2).value)
-questionNumber1 = sheet_obj.cell(row=1, column=8).value
-questionNumber2 = sheet_obj.cell(row=2, column=8).value
-questionNumber3 = sheet_obj.cell(row=3, column=8).value
-questionNumber4 = sheet_obj.cell(row=4, column=8).value
-
+numberOfArticlesBR = int(sheet_obj.cell(row=7, column=2).value)
 # get date time
 now = datetime.now()
 date = now.strftime("%d-%m-%y %H%M")
@@ -138,7 +134,7 @@ cookies.click()
 
 numAlertsArticle = len(df.index)
 
-while (len(df.index) - numAlertsArticle) < numberOfArticles:
+while (len(df.index) - numAlertsArticle) < numberOfArticlesBR:
     paragraph_summary = ""
     try:
         titlesText.append(titles[i].text)
