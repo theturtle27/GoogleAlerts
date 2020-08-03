@@ -34,6 +34,7 @@ tweetCriteria = got.manager.TweetCriteria().setQuerySearch(keyword) \
 tweets = got.manager.TweetManager.getTweets(tweetCriteria)
 
 # Creating list of chosen tweet data
+print("Getting Tweets...")
 text_tweets = [[tweet.date, tweet.text, tweet.username, tweet.retweets] for tweet in tweets]
 
 # Loop through tweets and change language to english
