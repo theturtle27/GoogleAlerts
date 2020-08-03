@@ -70,6 +70,7 @@ try:
 # else write new file
 except Exception as e:
     print(e)
+    print("New excel file created")
     df.to_excel(excelPath + keyword + '.xlsx',
                 sheet_name=date,
                 index=False)

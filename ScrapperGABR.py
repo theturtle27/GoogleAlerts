@@ -100,7 +100,7 @@ df['Keyword'] = keywordText
 df['Title'] = titlesText
 df['Source'] = sourcesText
 df['Link'] = linksText
-df['Paragraph'] = paragraphText
+df['Text'] = paragraphText
 
 browser.get('https://boardreader.com/')
 
@@ -191,10 +191,10 @@ while (len(df.index) - numAlertsArticle) < numberOfArticlesBR:
     dfCopy['Title'] = titlesText
     dfCopy['Source'] = sourcesText
     dfCopy['Link'] = linksText
-    dfCopy['Paragraph'] = paragraphText
+    dfCopy['Text'] = paragraphText
     # drop duplicates
     df = df.append(dfCopy)
-    df.drop_duplicates(subset='Paragraph', inplace=True)
+    df.drop_duplicates(subset='Text', inplace=True)
     print(len(df.index), ' article done!')
     dfCopy = pd.DataFrame()
     keywordText = []
@@ -205,7 +205,7 @@ while (len(df.index) - numAlertsArticle) < numberOfArticlesBR:
 
 browser.quit()
 # drop duplicates
-df.drop_duplicates(subset='Paragraph', inplace=True)
+df.drop_duplicates(subset='Text', inplace=True)
 # look for existing file
 excelPath = r"Excel\\"
 try:
@@ -230,6 +230,7 @@ try:
 # write new file
 except Exception as e:
     print(e)
+    print("New Excel File Created")
     df.to_excel(excelPath + keyword + '.xlsx',
                 sheet_name=date,
                 index=False)

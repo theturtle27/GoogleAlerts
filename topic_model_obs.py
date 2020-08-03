@@ -90,11 +90,6 @@ sheet_obj = wb_obj.active
 filename = sheet_obj.cell(row=14, column=2).value
 sheetName = sheet_obj.cell(row=15, column=2).value
 numtopics = int(sheet_obj.cell(row=16, column=2).value)
-noOfQuestions = int(sheet_obj.cell(row=17, column=2).value)
-header1 = sheet_obj.cell(row=18, column=2).value
-header2 = sheet_obj.cell(row=19, column=2).value
-header3 = sheet_obj.cell(row=20, column=2).value
-header4 = sheet_obj.cell(row=21, column=2).value
 
 OUTPUT_DIR = "output/"
 current_directory = os.getcwd()
@@ -115,14 +110,7 @@ data = pd.read_excel(filename + ".xlsx", sheetName)
 # columns_to_LDA = data[[col_name]]
 # columns_to_LDA = data[['Q69_11','Q69_12','Q70_12','Q70_13','Q93_29','Q93_35','Q94_30','Q94_36']]
 # columns_to_LDA = data[['(Q69) 12. Do you have suggestions for improvement for any of the Mission X activities?']]
-if noOfQuestions == 1:
-    columns_to_LDA = data[[header1]]
-elif noOfQuestions == 2:
-    columns_to_LDA = data[[header1, header2]]
-elif noOfQuestions == 3:
-    columns_to_LDA = data[[header1, header2, header3]]
-elif noOfQuestions == 4:
-    columns_to_LDA = data[[header1, header2, header3, header4]]
+columns_to_LDA = data[['Text']]
 # (Q69) 11. Do you have suggestions for improvement for any of the Mission X activities?    - BR1 - Q69_11	
 # (Q69) 12. Do you have suggestions for improvement for any of the Mission X activities?    - FV1 - Q69_12
 # (Q70) 12. What other topics would you like to be included in the training workshop?       - BS1 - Q70_12
@@ -191,7 +179,7 @@ for column in columns_to_LDA.columns:
     vis = pyLDAvis.gensim.prepare(lda_model, corpus, id2word)
 
     # Save the visualisation into an interactive page. Details on how to read it here: https://www.machinelearningplus.com/nlp/topic-modeling-gensim-python/
-    pyLDAvis.save_html(vis, f'{OUTPUT_DIR}filename_{column}_LDA_vis_{datetoday}.html')
+    pyLDAvis.save_html(vis, f'{OUTPUT_DIR}{filename}_{column}_LDA_vis_{datetoday}.html')
 
     df_topic_sents_keywords = format_topics_sentences(ldamodel=lda_model,
                                                       corpus=corpus,
@@ -222,12 +210,12 @@ alltopictables = pd.concat(list_of_topictables)
 # print(alltopictablesfinal)
 mastermatrix = pd.DataFrame()
 mastermatrix = pd.concat(list_of_df_dominant_topic)
-data = pd.concat([data]*noOfQuestions)
+data = pd.concat([data])
 outputmatrix = pd.concat([data, mastermatrix], axis=1)
 
 # Writing the dataframes into a single Excel workbook ------------------------
-outputfilename = f'{OUTPUT_DIR}filename{datetoday}_export.xlsx'
-outputfilename_wo_ext = f'filename{datetoday}_export'
+outputfilename = f'{OUTPUT_DIR}{filename}{datetoday}_export.xlsx'
+outputfilename_wo_ext = f'{filename}{datetoday}_export'
 writer = pd.ExcelWriter(outputfilename, engine='xlsxwriter')
 outputmatrix.to_excel(writer, sheet_name="Masterlist")
 mastermatrix.to_excel(writer, sheet_name="Topic Master Matrix")
